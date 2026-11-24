@@ -1,6 +1,6 @@
 // يخلي التطبيق يفتح بسرعة. ما يتدخل بقاعدة البيانات (Firebase)
-const CACHE = "deyonix-v10";
-const FILES = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./logo.jpg", "./apple-touch-icon.png"];
+const CACHE = "deyonix-v11";
+const FILES = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./logo.jpg", "./apple-touch-icon.png", "./logo-mark.svg"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x))))); self.clients.claim(); });
 self.addEventListener("fetch", e => {
