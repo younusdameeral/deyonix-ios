@@ -15,6 +15,15 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
+      - name: Prepare app files
+        script: |
+          # The files were uploaded flat (no folders), so put them where the build expects them
+          mkdir -p www resources
+          cp index.html manifest.json sw.js privacy.html terms.html support.html www/
+          cp icon-192.png icon-512.png apple-touch-icon.png logo.jpg www/
+          [ -f AppIcon-1024.png ] && cp AppIcon-1024.png resources/ || true
+          [ -f splash-2732.png ] && cp splash-2732.png resources/ || true
+          ls www resources
       - name: Install packages
         script: npm install
       - name: Create iOS project
