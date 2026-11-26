@@ -1632,7 +1632,10 @@ document.addEventListener("click",e=>{
   document.addEventListener("touchend",()=>{
     if(!p) return; const go=p.dy*0.5>=TH*0.75; p=null; const el=document.getElementById("ptr"); if(!el) return;
     el.style.transition="transform .2s, opacity .2s";
-    if(go){ el.classList.add("spin"); el.style.transform="translate(-50%,30px)"; setTimeout(()=>location.reload(),350); }
+    if(go){ el.classList.add("spin"); el.style.transform="translate(-50%,30px)";
+      // soft refresh: stay on the same page, no opening logo, just redraw with the latest data
+      setTimeout(()=>{ try{ document.querySelectorAll("img[data-img]").forEach(i=>{ if(!i.src) delete imgCache[i.dataset.img]; }); if(me) render(); else location.reload(); }catch(e){ console.warn(e); }
+        setTimeout(()=>{ el.classList.remove("spin"); el.style.opacity=0; el.style.transform="translate(-50%,-60px)"; },450); },500); }
     else { el.style.opacity=0; el.style.transform="translate(-50%,-60px)"; }
   },{passive:true});
 })();
@@ -1849,6 +1852,7 @@ function vAdminOrders(){
 applyLang();
 render();
 init();
+try{ if(sessionStorage.getItem("introSeen")){ const el=document.getElementById("intro"); if(el) el.remove(); } sessionStorage.setItem("introSeen","1"); }catch(e){}
 setTimeout(()=>{ const el=document.getElementById("intro"); if(!el) return; el.style.opacity="0"; setTimeout(()=>el.remove(),550); },2300);
 if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 </script>
