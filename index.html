@@ -242,6 +242,7 @@ const SMS_VERIFY = false;   // ← غيّرها إلى true لما تفعّل ا
 const ADMIN_PHONE = "07700000000";   // رقم المدير
 const DELIVERY = 2000;               // أجرة التوصيل بالدينار
 const EMAIL_DOMAIN = "otlob.app";
+const RESET_URL = "";   // ← link of the "resetpassword" server function (Google Cloud), filled in after setup
 
 /* ===== الأقسام =====
    order   = طلب منتجات (مطاعم، محلات، صيدليات)
@@ -278,6 +279,20 @@ let fa, fs, auth, fdb;
 /* ===== اللغات ===== */
 const LANGS = { ar:{label:"عربي",dir:"rtl"}, ckb:{label:"کوردی",dir:"rtl"}, tr:{label:"Türkçe",dir:"ltr"}, en:{label:"English",dir:"ltr"} };
 const TX = {
+rq_intro:["اكتب رقمك واسمك، وإدارة Deyonix راح تتصل بيك وتسويلك كلمة سر جديدة.","ژمارە و ناوت بنووسە، بەڕێوەبەرایەتی Deyonix پەیوەندیت پێوە دەکات و وشەی نهێنی نوێت بۆ دادەنێت.","Numaranı ve adını yaz; Deyonix yönetimi seni arayıp yeni bir şifre ayarlayacak.","Enter your number and name. Deyonix support will contact you and set a new password for you."],
+rq_name:["اسمك بالحساب","ناوت لە هەژمارەکەدا","Hesaptaki adın","Your name on the account"],
+rq_name_err:["اكتب اسمك","ناوت بنووسە","Adını yaz","Please enter your name"],
+rq_send:["إرسال الطلب","ناردنی داواکاری","Talebi gönder","Send request"],
+rq_sent:["تم إرسال طلبك","داواکارییەکەت نێردرا","Talebin gönderildi","Request sent"],
+rq_sent2:["راح نتصل بيك قريباً على رقمك (اتصال أو واتساب) حتى نتأكد إنك صاحب الحساب.","بەم زووانە پەیوەندیت پێوە دەکەین (پەیوەندی یان واتسئاپ) بۆ دڵنیابوونەوە.","Hesabın sahibi olduğunu doğrulamak için yakında seni arayacağız (telefon veya WhatsApp).","We'll call or WhatsApp you soon to check it's really your account."],
+rq_title:["طلبات نسيان كلمة السر","داواکاری وشەی نهێنی","Şifre sıfırlama talepleri","Password reset requests"],
+rq_new:["جديد","نوێ","Yeni","New"],
+rq_nouser:["ماكو حساب بهذا الرقم","هەژمار بەم ژمارەیە نییە","Bu numarayla hesap yok","No account with this number"],
+rq_set:["كلمة سر جديدة","وشەی نهێنی نوێ","Yeni şifre","Set new password"],
+rq_newpw:["اكتب كلمة السر الجديدة (6 أحرف أو أكثر)","وشەی نهێنی نوێ بنووسە (6+)","Yeni şifreyi yaz (6+ karakter)","Type the new password (6+ characters)"],
+rq_done:["تم تغيير كلمة السر. بلّغ صاحب الحساب:","وشەی نهێنی گۆڕدرا. بە خاوەنەکەی بڵێ:","Şifre değiştirildi. Hesap sahibine söyle:","Password changed. Tell the account owner:"],
+rq_fail:["ما تغيرت كلمة السر.","وشەی نهێنی نەگۆڕدرا.","Şifre değiştirilemedi.","Couldn't change the password."],
+rq_noserver:["لازم نشغّل خدمة تغيير كلمة السر أولاً (خطوة إعداد واحدة).","پێویستە سەرەتا خزمەتگوزاری گۆڕینی وشەی نهێنی چالاک بکرێت.","Önce şifre sıfırlama hizmetinin kurulması gerekiyor.","The password reset service needs to be set up first (a one-time step)."],
 app_tag:["اطلب أكلك وأغراضك وتوصلك لباب البيت","خواردن و پێداویستییەکانت داوا بکە، تا بەردەم دەرگا دەگات","Yemeğini ve ihtiyaçlarını sipariş et, kapına gelsin","Order food and essentials, delivered to your door"],
 loading:["⏳ جاري التحميل...","⏳ چاوەڕێ بکە...","⏳ Yükleniyor...","⏳ Loading..."],
 noconn:["ما گدرنا نتصل. تأكد من الإنترنت وافتح التطبيق مرة ثانية.","پەیوەندی نەکرا. ئینتەرنێتەکەت بپشکنە و دووبارە ئەپەکە بکەرەوە.","Bağlanılamadı. İnternetini kontrol edip uygulamayı tekrar aç.","Couldn't connect. Check your internet and open the app again."],
@@ -790,7 +805,7 @@ async function uploadPhoto(maxDim, btn){
 
 /* ===== الحالة ===== */
 let me=null, shops=[], mine=[], myOrders=[], inOrders=[], myBookings=[], inBookings=[], listings=[], myListings=[], users=[], allOrders=[], allBookings=[];
-let reports=[], reportTarget=null;
+let reports=[], reportTarget=null, resets=[];
 let chats=[], chatId=null, msgs=[], msgUnsub=null, pendingChat=null;
 let unsubs=[], marketOn=false, slotUnsub=null, taken=new Set();
 let ready=false, view="login", tab=null, shop=null, cart={}, loc=null, draft=null, ldraft=null, signRole="customer";
@@ -845,6 +860,7 @@ function startListeners(){
     listen(C("listings"), a=>listings=byTime(a));
     listen(C("users"), a=>users=a);
     listen(C("reports"), a=>{ reports=byTime(a); checkNotify("reports",a); });
+    listen(C("resets"), a=>{ resets=byTime(a); checkNotify("resets",a); });
     return;
   }
   listen(Q(C("shops"),W("status","==","approved")), a=>shops=a);
@@ -872,14 +888,14 @@ function alertBox(txt){ const d=document.createElement("div"); d.className="warn
    الرسم حسب نوع الحساب
    ========================================================= */
 const SUB_VIEWS=["chpw","delacc","report","areports","chat","section","biz","checkout","done","book","booked","market","listing","ledit","editor","activity","aorders"];
-const INPUT_VIEWS=["chpw","checkout","editor","book","ledit","chat","delacc","report"];
+const INPUT_VIEWS=["pwhelp","chpw","checkout","editor","book","ledit","chat","delacc","report"];
 function render(){
   document.body.className = (me ? me.role : "") + (view==="chat"&&me ? " chatv" : "");
   $("#cartbar").hidden=true;
   if(!ready){ curBack=null; $("#tabs").hidden=true; H(`${APP_NAME} 🛵`,""); A(`<div class="loading">${t("loading")}</div>`); return; }
   if(!me){ $("#tabs").hidden=true; curBack=null;
     if(view==="verify"){ if(document.body.dataset.view==="verify") return; vVerify(); }
-    else if(view==="signup") vSignup(); else vLogin(); syncHistory(); return; }
+    else if(view==="signup") vSignup(); else if(view==="pwhelp") vPwHelp(); else vLogin(); syncHistory(); return; }
   if(me.blocked){ $("#tabs").hidden=true; H(APP_NAME,"");
     A(`<div class="empty">${t("blocked")}<br><button class="btn light" onclick="logout()">${t("logout")}</button></div>`); return; }
   const T = {
@@ -972,11 +988,53 @@ async function login(){
   catch(e){ view="login"; ready=true; render(); keep(); $("#le").textContent=errMsg(e); }
 }
 async function forgotPw(){
-  if(authMode!=="email"){ alertBox(t("reset_phone")); return; }
+  if(authMode!=="email"){ try{ pwhelpNum=$("#lp").value; pwhelpCC=$("#lcc").value; }catch(e){} go("pwhelp"); return; }
   const em=$("#le2").value.trim().toLowerCase(); if(!isEmail(em)){ $("#le").textContent=t("bad_email"); return; }
   try{ await fa.sendPasswordResetEmail(auth,em); }catch(e){}
   alertBox(t("reset_sent"));
 }
+/* ===== 🔑 forgot password (phone accounts): send a request to the admin ===== */
+let pwhelpNum="", pwhelpCC="", pwhelpSent=false;
+function vPwHelp(){
+  document.body.dataset.view="pwhelp";
+  H(t("forgot_pw"),"",backBtn("pwhelpSent=false;go('login')"));
+  if(pwhelpSent){ A(`<div class="box" style="margin-top:14px;text-align:center"><div style="font-size:46px">✅</div><h2>${t("rq_sent")}</h2><p class="muted">${t("rq_sent2")}</p>
+    <button class="btn" onclick="pwhelpSent=false;go('login')">${t("login")}</button></div>`); return; }
+  A(`<div class="box" style="margin-top:14px"><p style="line-height:1.7">${t("rq_intro")}</p>
+    <label>${t("phone")}</label>${phoneRow("rcc","rp")}
+    <label>${t("rq_name")}</label><input id="rn" autocomplete="name">
+    <button class="btn" id="rb" onclick="sendPwHelp()">${t("rq_send")}</button><div class="err" id="re"></div></div>`);
+  if(pwhelpCC) setCC("rcc",pwhelpCC); if(pwhelpNum) $("#rp").value=pwhelpNum;
+}
+async function sendPwHelp(){
+  const k=phoneKey($("#rcc").value,$("#rp").value), n=$("#rn").value.trim();
+  if(digits(k).length<7){ $("#re").textContent=t("bad_phone"); return; }
+  if(n.length<2){ $("#re").textContent=t("rq_name_err"); return; }
+  $("#rb").textContent="⏳ ...";
+  try{ await fs.addDoc(fs.collection(fdb,"resets"),{phone:k,name:n.slice(0,60),time:Date.now(),status:"new"}); pwhelpSent=true; vPwHelp(); }
+  catch(e){ console.warn(e); $("#rb").textContent=t("rq_send"); $("#re").textContent=errMsg(e); }
+}
+/* admin: set a new password for a phone account (needs the small server function) */
+async function adminSetPw(phone,rid){
+  if(!RESET_URL){ alertBox(t("rq_noserver")); return; }
+  const pw=prompt(t("rq_newpw")+" ("+phone+")"); if(pw==null) return;
+  if(pw.length<6){ alertBox(t("e_weak")); return; }
+  try{ const tok=await auth.currentUser.getIdToken();
+    const r=await fetch(RESET_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:tok,email:keyEmail(phone),password:pw})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||("HTTP "+r.status));
+    if(rid) await fs.updateDoc(fs.doc(fdb,"resets",rid),{status:"done"});
+    alertBox(t("rq_done")+"\n"+phone+" → "+pw);
+  }catch(e){ console.warn(e); alertBox(t("rq_fail")+" "+(e.message||"")); }
+}
+function delReset(id){ save(()=>fs.deleteDoc(fs.doc(fdb,"resets",id))); }
+const resetBox=()=>{ const open=resets.filter(r=>r.status==="new"); if(!resets.length) return "";
+  return `<div class="box" style="margin-top:14px;border:2px solid var(--accent)"><b>🔑 ${t("rq_title")} (${open.length})</b>`+
+  resets.map(r=>{ const intl=toIntl(r.phone); return `<div class="order"><div class="top"><b>${esc(r.name)}</b>${r.status==="done"?tag(["✓","t-green"]):tag([t("rq_new"),"t-orange"])}</div>
+    <div class="hint"><span dir="ltr">📞 ${esc(r.phone)}</span> · ${ago(r.time)}${(()=>{ const u=users.find(x=>x.phone===r.phone); return u?` · ✓ ${esc(u.name)}`:` · ⚠️ ${t("rq_nouser")}`; })()}</div>
+    <div class="contact"><a class="btn sm green" href="tel:+${esc(intl)}">${t("call")}</a><a class="btn sm wa" href="https://wa.me/${esc(intl)}" target="_blank" rel="noopener">${t("whatsapp")}</a></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" onclick="adminSetPw('${esc(r.phone)}','${r.id}')">🔑 ${t("rq_set")}</button><button class="btn sm light" onclick="delReset('${r.id}')">🗑</button></div></div>`; }).join("")+`</div>`; };
+
 function vSignup(){
   document.body.dataset.view="signup";
   H(t("new_account"),t("pick_type"),backBtn("go('login')"));
@@ -1368,6 +1426,7 @@ function checkNotify(kind,list){
     const watching=view==="chat"&&chatId===c.id&&!document.hidden;
     if(n>o&&!watching){ const {title}=chatTitles(c); notify(t("n_new_msg"),`${title}: ${(c.last||{}).text||""}`,()=>openChat(c.id)); } });
   if(kind==="reports") diff(kind,list,(r,old)=>{ if(!old) notify(t("reports_t"),`${r.targetName||""} · ${t("r_"+r.reason)}`,()=>go("areports")); });
+  if(kind==="resets") diff(kind,list,(r,old)=>{ if(!old&&r.status==="new") notify("🔑 "+t("rq_title"),`${r.name} · ${r.phone}`,()=>setTab("users")); });
   if(kind==="adminShops") diff(kind,list,(s,old)=>{ if(!old&&s.status==="pending") notify(t("n_new_biz"),`${s.icon} ${s.name}`,()=>setTab("bizs")); });
   if(kind==="mine") diff(kind,list,(s,old)=>{ if(old&&old.status!=="approved"&&s.status==="approved") notify(t("n_biz_approved"),s.name,()=>setTab("mybiz")); });
 }
@@ -1836,9 +1895,9 @@ function vAdminMarket(){
 function vAdminUsers(){
   H(t("users_title"),`${users.length} ${t("accounts_n")}`);
   const R={customer:"t-gray",owner:"t-blue",admin:"t-orange"};
-  A(`<br>`+[...users].sort((a,b)=>(b.created||0)-(a.created||0)).map(u=>`<div class="order"><div class="top"><b>${esc(u.name)}</b>${tag([t("r_"+u.role),R[u.role]||"t-gray"])}</div>
+  A(resetBox()+`<br>`+[...users].sort((a,b)=>(b.created||0)-(a.created||0)).map(u=>`<div class="order"><div class="top"><b>${esc(u.name)}</b>${tag([t("r_"+u.role),R[u.role]||"t-gray"])}</div>
     <div class="hint"><span dir="ltr">📞 ${esc(u.phone)}</span> · ${allOrders.filter(o=>o.customerId===u.id).length} ${t("orders_n")} ${u.blocked?" · "+tag([t("f_suspended"),"t-red"]):""}</div>
-    ${u.role!=="admin"?`<button class="btn sm ${u.blocked?'green':'red'}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?t("unblock"):t("block")}</button>`:""}</div>`).join(""));
+    ${u.role!=="admin"?`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm ${u.blocked?'green':'red'}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?t("unblock"):t("block")}</button>${u.login&&!u.email?`<button class="btn sm light" onclick="adminSetPw('${esc(u.phone)}','')">🔑 ${t("rq_set")}</button>`:""}</div>`:""}</div>`).join(""));
 }
 function toggleBlock(id,val){ save(()=>fs.updateDoc(fs.doc(fdb,"users",id),{blocked:val})); }
 function vAdminOrders(){
