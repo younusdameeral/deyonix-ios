@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="90 110 860 720" width="860" height="720">
+<defs>
+<linearGradient id="o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB347"/><stop offset=".55" stop-color="#F7871E"/><stop offset="1" stop-color="#E0650A"/></linearGradient>
+<linearGradient id="w" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a3a40"/><stop offset=".6" stop-color="#26262b"/><stop offset="1" stop-color="#151518"/></linearGradient>
+<radialGradient id="bg" cx=".5" cy=".42" r=".8"><stop offset="0" stop-color="#1c1c1f"/><stop offset="1" stop-color="#060607"/></radialGradient>
+</defs>
+
+<g transform="translate(-5,15)"><g transform="translate(60,0) skewX(-9)">
+ <path d="M395,300 v-55 a95,95 0 0 1 190,0 v55" fill="none" stroke="url(#o)" stroke-width="40" stroke-linecap="round"/>
+ <rect x="320" y="300" width="125" height="470" rx="16" fill="url(#o)"/>
+</g><path d="M95,640 C230,860 700,880 930,500 C720,790 300,830 150,650 Z" fill="url(#o)"/><g transform="translate(60,0) skewX(-9)">
+ <path d="M465,300 h105 a235,235 0 0 1 0,470 h-105 v-115 h105 a120,120 0 0 0 0,-240 h-105 z" fill="url(#w)"/>
+ <path d="M500,445 h38 l34,120 h120 l25,-85 h-162" fill="none" stroke="#fff" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+ <path d="M582,520 h120" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+ <circle cx="590" cy="605" r="17" fill="#fff"/><circle cx="672" cy="605" r="17" fill="#fff"/>
+</g></g>
+</svg>
