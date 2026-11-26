@@ -1,7 +1,0 @@
-{
-  "appId": "comdameeral.deyonix",
-  "appName": "Deyonix",
-  "webDir": "www",
-  "backgroundColor": "#0a0a0b",
-  "ios": { "contentInset": "never", "limitsNavigationsToAppBoundDomains": false }
-}
