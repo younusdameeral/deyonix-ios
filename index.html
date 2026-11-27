@@ -253,6 +253,8 @@ const CATS = {
   doctor:{icon:"🩺",mode:"book"}, barber:{icon:"💈",mode:"book"},
   taxi:{icon:"🚕",mode:"contact"}, services:{icon:"🔧",mode:"contact"}
 };
+const KINDS = {"food": ["kebab", "shawarma", "pizza", "burger", "fastfood", "grill", "chicken", "iraqi", "sweets", "bakery", "cafe", "juice", "other"], "grocery": ["supermarket", "veg", "butcher", "bakery", "home", "clothes", "phones", "other"], "pharmacy": ["pharmacy", "other"], "doctor": ["general", "dentist", "children", "women", "eyes", "ent", "bones", "skin", "internal", "other"], "barber": ["men", "women", "other"], "taxi": ["taxi", "van", "other"]};
+const kindLbl=s=>{ const c=catOf(s), L=KINDS[c]; if(s.kind&&s.kind!=="other"&&L&&L.includes(s.kind)) return t("k_"+c+"_"+s.kind); return esc(s.type||""); };
 const SUBS = ["electrician","plumber","handyman","mechanic","carpenter","painter","ac","other"];
 const SUBI = {electrician:"⚡",plumber:"🚰",handyman:"🛠️",mechanic:"🔩",carpenter:"🪚",painter:"🖌️",ac:"❄️",other:"🔧"};
 const MCATS = ["cars","phones","furniture","tools","clothes","other"];
@@ -279,6 +281,48 @@ let fa, fs, auth, fdb;
 /* ===== اللغات ===== */
 const LANGS = { ar:{label:"عربي",dir:"rtl"}, ckb:{label:"کوردی",dir:"rtl"}, tr:{label:"Türkçe",dir:"ltr"}, en:{label:"English",dir:"ltr"} };
 const TX = {
+k_food_kebab:["كباب", "کەباب", "Kebap", "Kebab"],
+k_food_shawarma:["شاورما", "شاوەرمە", "Döner", "Shawarma"],
+k_food_pizza:["بيتزا", "پیتزا", "Pizza", "Pizza"],
+k_food_burger:["برگر", "بەرگەر", "Burger", "Burgers"],
+k_food_fastfood:["أكلات سريعة", "خواردنی خێرا", "Fast food", "Fast food"],
+k_food_grill:["مشويات", "برژاو", "Izgara", "Grills"],
+k_food_chicken:["دجاج", "مریشک", "Tavuk", "Chicken"],
+k_food_iraqi:["أكلات عراقية", "خواردنی عێراقی", "Irak yemekleri", "Iraqi food"],
+k_food_sweets:["حلويات", "شیرینی", "Tatlı", "Sweets"],
+k_food_bakery:["مخبز", "نانەواخانە", "Fırın", "Bakery"],
+k_food_cafe:["كافيه", "کافێ", "Kafe", "Café"],
+k_food_juice:["عصائر", "ئاوی میوە", "Meyve suyu", "Juices"],
+k_food_other:["أخرى", "هیتر", "Diğer", "Other"],
+k_grocery_supermarket:["سوبرماركت", "سوپەرمارکێت", "Market", "Supermarket"],
+k_grocery_veg:["خضار وفواكه", "میوە و سەوزە", "Manav", "Fruit & veg"],
+k_grocery_butcher:["قصاب", "قەساب", "Kasap", "Butcher"],
+k_grocery_bakery:["مخبز", "نانەواخانە", "Fırın", "Bakery"],
+k_grocery_home:["مواد منزلية", "کەلوپەلی ماڵ", "Ev eşyası", "Household goods"],
+k_grocery_clothes:["ملابس", "جل و بەرگ", "Giyim", "Clothes"],
+k_grocery_phones:["موبايلات", "مۆبایل", "Telefon", "Phones"],
+k_grocery_other:["أخرى", "هیتر", "Diğer", "Other"],
+k_pharmacy_pharmacy:["صيدلية", "دەرمانخانە", "Eczane", "Pharmacy"],
+k_pharmacy_other:["أخرى", "هیتر", "Diğer", "Other"],
+k_doctor_general:["طبيب عام", "پزیشکی گشتی", "Pratisyen hekim", "General doctor"],
+k_doctor_dentist:["أسنان", "ددان", "Diş hekimi", "Dentist"],
+k_doctor_children:["أطفال", "منداڵان", "Çocuk doktoru", "Children"],
+k_doctor_women:["نسائية", "ئافرەتان", "Kadın doğum", "Women's health"],
+k_doctor_eyes:["عيون", "چاو", "Göz", "Eyes"],
+k_doctor_ent:["أنف وأذن وحنجرة", "لووت و گوێ و قوڕگ", "KBB", "Ear, nose & throat"],
+k_doctor_bones:["عظام", "ئێسک", "Ortopedi", "Bones"],
+k_doctor_skin:["جلدية", "پێست", "Cildiye", "Skin"],
+k_doctor_internal:["باطنية", "ناوەکی", "Dahiliye", "Internal medicine"],
+k_doctor_other:["أخرى", "هیتر", "Diğer", "Other"],
+k_barber_men:["حلاقة رجالية", "سەرتاشی پیاوان", "Erkek berberi", "Men's barber"],
+k_barber_women:["صالون نسائي", "ساڵۆنی ئافرەتان", "Kadın kuaförü", "Ladies' salon"],
+k_barber_other:["أخرى", "هیتر", "Diğer", "Other"],
+k_taxi_taxi:["تكسي", "تەکسی", "Taksi", "Taxi"],
+k_taxi_van:["نقل وحمل", "گواستنەوە", "Nakliye", "Van & transport"],
+k_taxi_other:["أخرى", "هیتر", "Diğer", "Other"],
+kind_lbl:["النوع","جۆر","Tür","Type"],
+desc_opt:["وصف إضافي (اختياري)","وەسفی زیاتر (ئارەزوومەندانە)","Ek açıklama (isteğe bağlı)","Extra description (optional)"],
+
 rq_intro:["اكتب رقمك واسمك، وإدارة Deyonix راح تتصل بيك وتسويلك كلمة سر جديدة.","ژمارە و ناوت بنووسە، بەڕێوەبەرایەتی Deyonix پەیوەندیت پێوە دەکات و وشەی نهێنی نوێت بۆ دادەنێت.","Numaranı ve adını yaz; Deyonix yönetimi seni arayıp yeni bir şifre ayarlayacak.","Enter your number and name. Deyonix support will contact you and set a new password for you."],
 rq_name:["اسمك بالحساب","ناوت لە هەژمارەکەدا","Hesaptaki adın","Your name on the account"],
 rq_name_err:["اكتب اسمك","ناوت بنووسە","Adını yaz","Please enter your name"],
@@ -1174,7 +1218,7 @@ function vHome(){
 function openSec(c){ if(c==="market"){ startMarket(); mkFilter="all"; go("market"); return; } secCat=c; svcFilter="all"; go("section"); }
 const openTag=s=>modeOf(s)==="contact" ? (s.open?tag([t("avail_tag"),"t-green"]):tag([t("unavail_tag"),"t-gray"])) : (s.open?tag([t("open"),"t-green"]):tag([t("closed_now"),"t-gray"]));
 const bizCard=s=>`<button class="card" onclick="openBiz('${s.id}')">${s.photo?IMG(s.photo,"thumb"):`<div class="ic">${s.icon}</div>`}
-  <div class="grow"><b>${esc(s.name)}</b><small>${s.sub?SUBI[s.sub]+" "+t("sub_"+s.sub)+" · ":""}${esc(s.type)}</small>${s.area?`<small>📍 ${esc(s.area)}</small>`:""}${openTag(s)}</div></button>`;
+  <div class="grow"><b>${esc(s.name)}</b><small>${s.sub?SUBI[s.sub]+" "+t("sub_"+s.sub)+" · ":""}${kindLbl(s)}</small>${s.area?`<small>📍 ${esc(s.area)}</small>`:""}${openTag(s)}</div></button>`;
 function vSection(){
   const c=secCat; let list=approvedOf(c);
   if(c==="services"&&svcFilter!=="all") list=list.filter(s=>s.sub===svcFilter);
@@ -1189,7 +1233,7 @@ const cartCount=()=>cartItems().reduce((a,x)=>a+x.q,0);
 const subtotal=()=>cartItems().reduce((a,x)=>a+x.q*x.p,0);
 function vBiz(){
   shop=shopOf(shop.id)||shop; const s=shop, m=modeOf(s);
-  H(`${s.icon} ${esc(s.name)}`,esc(s.type),backBtn(`secCat='${catOf(s)}';go('section')`));
+  H(`${s.icon} ${esc(s.name)}`,kindLbl(s)+(s.kind&&s.kind!=="other"&&s.type?" · "+esc(s.type):""),backBtn(`secCat='${catOf(s)}';go('section')`));
   let html=(s.photo?IMG(s.photo,"cover"):"")+`<div class="box" style="margin-top:14px">
     ${s.sub?`<div>${SUBI[s.sub]} ${t("sub_"+s.sub)}</div>`:""}${s.car?`<div>🚗 ${esc(s.car)}</div>`:""}${s.area?`<div>📍 ${esc(s.area)}</div>`:""}
     <div style="margin-top:6px">${openTag(s)}</div>${contactBtns(s.phone)}${s.ownerId!==me.uid&&me.role!=="admin"?`<button class="btn msg" onclick="startChat('biz','${s.id}')">${t("send_msg")}</button>
@@ -1798,8 +1842,8 @@ function vMyBiz(){
 }
 const DEF_SCHED={days:[0,1,2,3,4,6],from:"09:00",to:"17:00",slot:30};
 function editShop(){ const s=myShop();
-  draft=s?{id:s.id,cat:catOf(s),name:s.name,type:s.type,phone:toLocal(s.phone),icon:s.icon,menu:JSON.parse(JSON.stringify(s.menu||[])),area:s.area||"",photo:s.photo||"",car:s.car||"",sub:s.sub||"electrician",schedule:JSON.parse(JSON.stringify(s.schedule||DEF_SCHED))}
-         :{id:"",cat:"",name:"",type:"",phone:me.phone,icon:"",menu:[],area:"",photo:"",car:"",sub:"electrician",schedule:JSON.parse(JSON.stringify(DEF_SCHED))};
+  draft=s?{id:s.id,cat:catOf(s),name:s.name,type:s.type,phone:toLocal(s.phone),icon:s.icon,menu:JSON.parse(JSON.stringify(s.menu||[])),area:s.area||"",photo:s.photo||"",car:s.car||"",sub:s.sub||"electrician",kind:s.kind||"",schedule:JSON.parse(JSON.stringify(s.schedule||DEF_SCHED))}
+         :{id:"",cat:"",name:"",type:"",phone:me.phone,icon:"",menu:[],area:"",photo:"",car:"",sub:"electrician",kind:"",schedule:JSON.parse(JSON.stringify(DEF_SCHED))};
   go("editor"); }
 function pickCat(c){ draft.cat=c; draft.icon=CATS[c].icon; redraw(); }
 function vEditor(){
@@ -1812,7 +1856,8 @@ function vEditor(){
       ${d.photo?IMG(d.photo,"cover"):""}<button class="photo-btn" onclick="sync();bizPhoto(this)">${d.photo?t("change_photo"):t("add_photo")}</button>
       <label>${t("the_name")}</label><input id="eName" value="${esc(d.name)}" placeholder="${t("name_ph")}">
       ${d.cat==="services"?`<label>${t("svc_type")}</label><select id="eSub">${SUBS.map(k=>`<option value="${k}" ${d.sub===k?'selected':''}>${SUBI[k]} ${t("sub_"+k)}</option>`).join("")}</select>`:""}
-      <label>${t("description")}</label><input id="eType" value="${esc(d.type)}" placeholder="${t("desc_ph")}">
+      ${KINDS[d.cat]?`<label>${t("kind_lbl")}</label><select id="eKind"><option value="">—</option>${KINDS[d.cat].map(k=>`<option value="${k}" ${d.kind===k?'selected':''}>${t("k_"+d.cat+"_"+k)}</option>`).join("")}</select>`:""}
+      <label>${KINDS[d.cat]?t("desc_opt"):t("description")}</label><input id="eType" value="${esc(d.type)}" placeholder="${t("desc_ph")}">
       ${d.cat==="taxi"?`<label>${t("car")}</label><input id="eCar" value="${esc(d.car)}" placeholder="${t("car_ph")}">`:""}
       <label>${t("area")}</label><input id="eArea" value="${esc(d.area)}" placeholder="${t("area_ph")}">
       <label>${t("wa_phone")}</label><input id="ePhone" type="tel" value="${esc(d.phone)}" dir="ltr">
@@ -1832,7 +1877,7 @@ function vEditor(){
 function redraw(){ const y=window.scrollY; vEditor(); hydrate(); window.scrollTo(0,y); }
 function sync(){ const g=id=>$("#"+id); if(!draft.cat) return;
   draft.name=g("eName").value.trim(); draft.type=g("eType").value.trim(); draft.phone=g("ePhone").value.trim(); draft.area=g("eArea").value.trim();
-  if(g("eCar")) draft.car=g("eCar").value.trim(); if(g("eSub")) draft.sub=g("eSub").value;
+  if(g("eCar")) draft.car=g("eCar").value.trim(); if(g("eSub")) draft.sub=g("eSub").value; if(g("eKind")) draft.kind=g("eKind").value;
   if(g("eFrom")){ draft.schedule={days:[0,1,2,3,4,5,6].filter(k=>g("day"+k).checked),from:g("eFrom").value,to:g("eTo").value,slot:Number(g("eSlot").value)}; } }
 async function bizPhoto(btn){ const id=await uploadPhoto(1000,btn); if(id) draft.photo=id; redraw(); }
 async function itemPhoto(i,btn){ btn.textContent="⏳"; const id=await uploadPhoto(500); if(id) draft.menu[i].img=id; redraw(); }
@@ -1840,14 +1885,15 @@ function addItem(){ sync(); const n=$("#iName").value.trim(), p=parseInt(digits(
   if(!n||!(p>0)){ $("#iErr").textContent=t("product_err"); return; } draft.menu.push({n,p}); redraw(); $("#iName").focus(); }
 async function saveShop(){
   sync(); const d=draft, m=CATS[d.cat].mode, miss=[];
-  if(!d.name) miss.push(t("the_name")); if(!d.type) miss.push(t("description"));
+  if(!d.name) miss.push(t("the_name"));
+  if(KINDS[d.cat]){ if(!d.kind) miss.push(t("kind_lbl")); else if(d.kind==="other"&&!d.type) miss.push(t("description")); } else if(!d.type) miss.push(t("description"));
   if(!validPhone(d.phone)) miss.push(t("valid_wa"));
   if(m==="order"&&!d.menu.length) miss.push(t("one_product"));
   if(miss.length){ $("#eErr").textContent=t("missing")+miss.join(t("sep")); return; }
   if(m==="book"&&(!d.schedule.days.length||!(d.schedule.from<d.schedule.to))){ $("#eErr").textContent=t("sched_err"); return; }
   $("#saveBtn").textContent=t("saving");
   const data={name:d.name,type:d.type,phone:toIntl(d.phone),icon:d.icon,area:d.area,photo:d.photo,
-    menu:m==="order"?d.menu:[], car:d.cat==="taxi"?d.car:"", sub:d.cat==="services"?d.sub:"", schedule:m==="book"?d.schedule:null};
+    menu:m==="order"?d.menu:[], car:d.cat==="taxi"?d.car:"", sub:d.cat==="services"?d.sub:"", kind:KINDS[d.cat]?d.kind:"", schedule:m==="book"?d.schedule:null};
   const ok=await save(()=> d.id ? fs.updateDoc(fs.doc(fdb,"shops",d.id),data)
     : fs.addDoc(fs.collection(fdb,"shops"),{...data,cat:d.cat,ownerId:me.uid,ownerName:me.name,ownerPhone:me.phone,status:"pending",open:true,created:Date.now()}),"#eErr");
   if(ok) setTab("mybiz"); else $("#saveBtn").textContent=t("save");
@@ -1875,7 +1921,7 @@ function bizAdminCard(s){
   const n=allOrders.filter(x=>x.shopId===s.id).length+allBookings.filter(x=>x.bizId===s.id).length;
   const acts={pending:[["approved","approve","green"],["suspended","reject","red"]],approved:[["suspended","suspend","red"]],suspended:[["approved","reactivate","green"]]}[s.status]||[];
   return `<div class="order"><div class="top"><b>${s.icon} ${esc(s.name)}</b>${shTag(s.status)}</div>
-    <div class="hint">${CATS[catOf(s)].icon} ${t("sec_"+catOf(s))}${s.sub?" · "+t("sub_"+s.sub):""} · ${esc(s.type)}${s.area?" · 📍 "+esc(s.area):""}<br>${modeOf(s)==="order"?`${(s.menu||[]).length} ${t("products_n")} · `:""}${n} ${t("orders_n")}<br>${t("shop_owner_lbl")} ${esc(s.ownerName||"")} — <span dir="ltr">${esc(s.ownerPhone||"")}</span></div>
+    <div class="hint">${CATS[catOf(s)].icon} ${t("sec_"+catOf(s))}${s.sub?" · "+t("sub_"+s.sub):""} · ${kindLbl(s)}${s.area?" · 📍 "+esc(s.area):""}<br>${modeOf(s)==="order"?`${(s.menu||[]).length} ${t("products_n")} · `:""}${n} ${t("orders_n")}<br>${t("shop_owner_lbl")} ${esc(s.ownerName||"")} — <span dir="ltr">${esc(s.ownerPhone||"")}</span></div>
     ${acts.map(([st,l,c])=>`<button class="btn sm ${c}" onclick="setShopStatus('${s.id}','${st}')">${t(l)}</button>`).join("")}</div>`;
 }
 function setShopStatus(id,st){ save(()=>fs.updateDoc(fs.doc(fdb,"shops",id),{status:st})); }
